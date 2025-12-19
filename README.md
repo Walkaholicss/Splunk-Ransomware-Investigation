@@ -90,31 +90,43 @@ The following Splunk Search Processing Language (SPL) queries were instrumental 
 ```splunk
 index=main sourcetype=web_traffic user_agent!=*Mozilla* | stats count by client_ip 
 | sort -count
-Result: Identified 198.51.100.55 as the primary threat actor.
 
-2. Detecting SQL Injection Tools:
+```
 
-Code snippet
+*Result: Identified `198.51.100.55` as the primary threat actor.*
 
+**2. Detecting SQL Injection Tools:**
+
+```splunk
 sourcetype=web_traffic client_ip="198.51.100.55" AND user_agent IN ("*sqlmap*", "*Havij*") 
 | table _time, path, status
-3. Correlating C2 Traffic:
 
-Code snippet
+```
 
+**3. Correlating C2 Traffic:**
+
+```splunk
 sourcetype=firewall_logs src_ip="10.10.1.15" dest_ip="198.51.100.55" action="ALLOWED"
 | stats sum(bytes_transferred) by src_ip
-4. Remediation & Lessons Learned
-Immediate Actions
-Block IP: Immediately block 198.51.100.55 at the perimeter firewall.
 
-Isolate Host: Quarantine the web server (10.10.1.15) from the production network to prevent lateral movement.
+```
 
-Credential Reset: Reset all administrative credentials associated with the web server.
+---
 
-Strategic Recommendations
-WAF Implementation: Deploy a Web Application Firewall (WAF) to block common attack signatures like SQLi (UNION SELECT) and Path Traversal (../).
+## 4. Remediation & Lessons Learned
 
-User-Agent Filtering: Configure the web server to reject requests from known scanner User-Agents (e.g., Havij, zgrab).
+### Immediate Actions
 
-Egress Filtering: Restrict outbound server traffic to only necessary IPs/Ports to prevent C2 callbacks.
+1. **Block IP:** Immediately block `198.51.100.55` at the perimeter firewall.
+2. **Isolate Host:** Quarantine the web server (`10.10.1.15`) from the production network to prevent lateral movement.
+3. **Credential Reset:** Reset all administrative credentials associated with the web server.
+
+### Strategic Recommendations
+
+1. **WAF Implementation:** Deploy a Web Application Firewall (WAF) to block common attack signatures like SQLi (`UNION SELECT`) and Path Traversal (`../`).
+2. **User-Agent Filtering:** Configure the web server to reject requests from known scanner User-Agents (e.g., `Havij`, `zgrab`).
+3. **Egress Filtering:** Restrict outbound server traffic to only necessary IPs/Ports to prevent C2 callbacks.
+
+```
+
+```
